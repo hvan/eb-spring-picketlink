@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+ <sec:http entry-point-ref="jbossAuthenticationEntryPoint">
+<!--  <sec:http auto-config="true"> -->
+    <!-- Additional http configuration omitted -->
+    <sec:custom-filter position="PRE_AUTH_FILTER" ref="myFilter" />
+ <!--   	<sec:intercept-url pattern="/secure/**" access="isAuthenticated()"/>
+	<sec:intercept-url pattern="/**" access="isAuthenticated()"/> -->
+  </sec:http>
+  
+  <bean id="jbossAuthenticationEntryPoint" class="samples.jaas.JBossAuthenticationEntryPoint"/>
+  
+  
+
+<!-- <bean id="filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+        <property name="authenticationManager" ref="authenticationManager"/>
+        <property name="accessDecisionManager" ref="httpRequestAccessDecisionManager"/>
+        <property name="securityMetadataSource">
+        	<sec:http>
+       		 	 <sec:intercept-url pattern="/secure/**" access="isAuthenticated()"/>
+				 <sec:intercept-url pattern="/**" access="isAuthenticated()"/>
+			</sec:http>
+            <sec:filter-invocation-definition-source>
+                <sec:intercept-url pattern="/secure/**" access="isAuthenticated()"/>
+				<sec:intercept-url pattern="/**" access="isAuthenticated()"/>
+            </sec:filter-invocation-definition-source>
+        </property>
+</bean> -->
+
+
+
+    <bean id="myFilter" class="org.springframework.security.web.authentication.preauth.j2ee.J2eePreAuthenticatedProcessingFilter">
+  <!--    <property name="principalRequestHeader" value="SM_USER"/> -->
+    <property name="authenticationManager" ref="authenticationManager" /> 
+
+  </bean>
+
+  <bean id="preauthAuthProvider"
+class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
+    <property name="preAuthenticatedUserDetailsService">
+      <bean id="userDetailsServiceWrapper2"
+          class="org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper">
+        <property name="userDetailsService" ref="userDetailsService"/>
+      </bean>
+    </property>
+    </bean>
+    
+    <bean id="userDetailsService" class="samples.jaas.JBossUserDetailsService"/>
+  
+    <sec:authentication-manager alias="authenticationManager">
+      <sec:authentication-provider ref="preauthAuthProvider" />
+    </sec:authentication-manager>
+
+<!-- 	<sec:http auto-config="true" jaas-api-provision="true">
+		<sec:intercept-url pattern="/secure/**" access="isAuthenticated()"/>
+		<sec:intercept-url pattern="/**" access="isAuthenticated()"/>
+	</sec:http> -->
+
+<!-- 	<sec:authentication-manager>
+		<sec:authentication-provider ref="jaasAuthProvider"/>
+	</sec:authentication-manager>
+
+	<bean id="jaasAuthProvider"
+	class="org.springframework.security.authentication.jaas.DefaultJaasAuthenticationProvider">
+		<property name="configuration">
+			<bean
+				class="org.springframework.security.authentication.jaas.memory.InMemoryConfiguration">
+				<constructor-arg>
+					<map>
+						<entry key="SPRINGSECURITY">
+							<array>
+								<bean class="javax.security.auth.login.AppConfigurationEntry">
+								
+									<constructor-arg
+										value="samples.jaas.UsernameEqualsPasswordLoginModule" />
+									<constructor-arg
+										value="org.picketlink.identity.federation.bindings.jboss.auth.SAML2LoginModule" />
+									<constructor-arg>
+										<util:constant
+											static-field="javax.security.auth.login.AppConfigurationEntry$LoginModuleControlFlag.REQUIRED" />
+									</constructor-arg>
+									<constructor-arg>
+										<map></map>
+									</constructor-arg>
+								</bean>
+							</array>
+						</entry>
+					</map>
+				</constructor-arg>
+			</bean>
+		</property>
+		<property name="authorityGranters">
+			<list>
+				<bean class="samples.jaas.RoleUserAuthorityGranter" />
+			</list>
+		</property>
+	</bean>
+	 -->
+	<!-- <bean id="jaasAuthProvider"
+   class="org.springframework.security.authentication.jaas.JaasAuthenticationProvider">
+ <property name="loginConfig" value="/WEB-INF/login.conf"/>
+ <property name="loginContextName" value="sp"/>
+ <property name="callbackHandlers">
+  <list>
+   <bean
+     class="org.springframework.security.authentication.jaas.JaasNameCallbackHandler"/>
+   <bean
+     class="org.springframework.security.authentication.jaas.JaasPasswordCallbackHandler"/>
+  </list>
+  </property>
+  <property name="authorityGranters">
+    <list>
+     <bean class="samples.jaas.RoleUserAuthorityGranter" />
+    </list>
+  </property>
+</bean> -->
+</beans>
